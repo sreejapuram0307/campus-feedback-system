@@ -34,7 +34,6 @@ export const googleCallback = async (req, res) => {
     const { code } = req.query
 
     if (!code) {
-      console.error('Google callback: missing authorization code')
       return res.redirect(`${env.FRONTEND_URL}/access-denied`)
     }
 
@@ -52,14 +51,11 @@ export const googleCallback = async (req, res) => {
     })
 
     if (!profileRes.ok) {
-      console.error('Google callback: failed to fetch user profile')
       return res.redirect(`${env.FRONTEND_URL}/access-denied`)
     }
 
-    const profile = await profileRes.json()
-    const email = profile.email
-
-    console.log('Google email:', email)
+    const googleProfile = await profileRes.json()
+    const email = googleProfile.emails?.[0]?.value ?? googleProfile.email ?? null
 
     if (!email) {
       return res.redirect(`${env.FRONTEND_URL}/access-denied`)
@@ -68,7 +64,6 @@ export const googleCallback = async (req, res) => {
     const student = await Student.findOne({ email })
 
     if (!student) {
-      console.log('Access denied: email not in students collection')
       return res.redirect(`${env.FRONTEND_URL}/access-denied`)
     }
 
@@ -80,14 +75,14 @@ export const googleCallback = async (req, res) => {
         year: student.year,
         section: student.section,
       },
-      env.JWT_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: '1d' }
     )
 
-    res.redirect(`${env.FRONTEND_URL}/dashboard?token=${token}`)
+    return res.redirect(`${env.FRONTEND_URL}/dashboard?token=${token}`)
   } catch (error) {
     console.error('Google callback error:', error.message)
-    res.redirect(`${env.FRONTEND_URL}/access-denied`)
+    return res.redirect(`${env.FRONTEND_URL}/access-denied`)
   }
 }
 
