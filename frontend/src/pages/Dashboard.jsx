@@ -1,5 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import '../styles/Dashboard.css'
+
+const SUBJECTS = [
+  'SIMA - Rajashekhar',
+  'DLD - Shireesha',
+  'Software Engineering - Sowmya',
+]
 
 function decodeToken(token) {
   try {
@@ -11,9 +18,17 @@ function decodeToken(token) {
   }
 }
 
+function val(value) {
+  return value !== undefined && value !== null && value !== '' ? value : 'N/A'
+}
+
 export default function Dashboard() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
+  const [selectedSubject, setSelectedSubject] = useState('')
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const profileRef = useRef(null)
 
   useEffect(() => {
     const urlToken = new URLSearchParams(window.location.search).get('token')
@@ -40,58 +55,165 @@ export default function Dashboard() {
     setUser(decoded)
   }, [navigate])
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    navigate('/login', { replace: true })
-  }
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   if (!user) {
     return null
   }
 
   return (
-    <div className="flex min-h-full items-center justify-center bg-slate-50 p-6">
-      <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-xl">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-            <p className="mt-1 text-sm text-slate-500">Campus Feedback Hub</p>
-          </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-800 text-xs font-bold text-white">
-            CFH
+    <div className="dashboard">
+      <button
+        type="button"
+        className="dashboard-menu-toggle"
+        onClick={() => setSidebarOpen((o) => !o)}
+        aria-label="Toggle menu"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      <div
+        className={`dashboard-overlay${sidebarOpen ? ' open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+        role="presentation"
+      />
+
+      <aside className={`dashboard-sidebar${sidebarOpen ? ' open' : ''}`}>
+        <div className="dashboard-sidebar-header">
+          <div className="dashboard-brand">
+            <div className="dashboard-brand-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+              </svg>
+            </div>
+            <span className="dashboard-brand-text">Student Feedback Automation System</span>
           </div>
         </div>
 
-        <div className="space-y-3 rounded-xl bg-slate-50 p-6">
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Email</span>
-            <span className="font-medium text-slate-900">{user.email}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Roll Number</span>
-            <span className="font-medium text-slate-900">{user.rollNumber}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Branch</span>
-            <span className="font-medium text-slate-900">{user.branch}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Year</span>
-            <span className="font-medium text-slate-900">{user.year}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Section</span>
-            <span className="font-medium text-slate-900">{user.section}</span>
-          </div>
-        </div>
+        <nav className="dashboard-nav">
+          <button type="button" className="dashboard-nav-item active">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            <span>Dashboard</span>
+          </button>
+          <button type="button" className="dashboard-nav-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+              <rect x="9" y="3" width="6" height="4" rx="1" />
+              <path d="M9 14l2 2 4-4" />
+            </svg>
+            <span>Status Tracking</span>
+          </button>
+        </nav>
+      </aside>
 
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-800"
-        >
-          Logout
-        </button>
+      <div className="dashboard-main">
+        <header className="dashboard-topbar">
+          <div className="dashboard-avatar-wrapper" ref={profileRef}>
+            <button
+              type="button"
+              className="dashboard-avatar"
+              onClick={() => setProfileOpen((o) => !o)}
+              aria-label="Profile menu"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </button>
+
+            {profileOpen && (
+              <div className="dashboard-profile-dropdown">
+                <h3>Student Profile</h3>
+                <div className="dashboard-profile-row">
+                  <span className="dashboard-profile-label">Roll Number</span>
+                  <span className="dashboard-profile-value">{val(user.rollNumber)}</span>
+                </div>
+                <div className="dashboard-profile-row">
+                  <span className="dashboard-profile-label">Branch</span>
+                  <span className="dashboard-profile-value">{val(user.branch)}</span>
+                </div>
+                <div className="dashboard-profile-row">
+                  <span className="dashboard-profile-label">Year</span>
+                  <span className="dashboard-profile-value">{val(user.year)}</span>
+                </div>
+                <div className="dashboard-profile-row">
+                  <span className="dashboard-profile-label">Section</span>
+                  <span className="dashboard-profile-value">{val(user.section)}</span>
+                </div>
+                <div className="dashboard-profile-row">
+                  <span className="dashboard-profile-label">Email</span>
+                  <span className="dashboard-profile-value">{val(user.email)}</span>
+                </div>
+                <button type="button" className="dashboard-logout-btn">
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
+
+        <main className="dashboard-content">
+          <section className="dashboard-welcome-card">
+            <div className="dashboard-welcome-text">
+              <h1>Welcome back 👋</h1>
+              <p>Your feedback helps us improve the learning experience.</p>
+            </div>
+            <div className="dashboard-welcome-illustration" aria-hidden="true">
+              📚
+            </div>
+          </section>
+
+          <section className="dashboard-subject-card">
+            <h2>Select a Subject</h2>
+            <p>Choose a subject from the list below to provide feedback.</p>
+
+            <div className="dashboard-select-wrapper">
+              <select
+                className="dashboard-select"
+                value={selectedSubject}
+                onChange={(e) => setSelectedSubject(e.target.value)}
+              >
+                <option value="">-- Select a Subject --</option>
+                {SUBJECTS.map((subject) => (
+                  <option key={subject} value={subject}>
+                    {subject}
+                  </option>
+                ))}
+              </select>
+              <span className="dashboard-select-arrow">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </span>
+            </div>
+
+            <div className="dashboard-info-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
+              <span>
+                Once you submit feedback for a subject, you will not be able to submit it again.
+              </span>
+            </div>
+          </section>
+        </main>
       </div>
     </div>
   )
