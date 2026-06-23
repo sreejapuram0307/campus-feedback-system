@@ -25,10 +25,44 @@ function val(value) {
 export default function Dashboard() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
-  const [selectedSubject, setSelectedSubject] = useState('')
   const [profileOpen, setProfileOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const profileRef = useRef(null)
+
+ const handleSubjectClick = async (subject) => {
+  try {
+    const token = localStorage.getItem('token')
+    const decoded = decodeToken(token)
+
+    if (!decoded?.email) {
+      alert('User session invalid')
+      return
+    }
+
+    const response = await fetch(
+      `http://localhost:5000/feedback/check?studentEmail=${decoded.email}&subject=${encodeURIComponent(subject)}`
+    )
+
+    const data = await response.json()
+
+    if (data.alreadySubmitted) {
+      alert('Feedback already submitted for this subject')
+      return
+    }
+
+    localStorage.setItem('selectedSubject', subject)
+    navigate('/feedback')
+  } catch (error) {
+    console.error(error)
+    alert('Error checking feedback status')
+  }
+}
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('selectedSubject')
+    navigate('/login', { replace: true })
+  }
 
   useEffect(() => {
     const urlToken = new URLSearchParams(window.location.search).get('token')
@@ -160,7 +194,7 @@ export default function Dashboard() {
                   <span className="dashboard-profile-label">Email</span>
                   <span className="dashboard-profile-value">{val(user.email)}</span>
                 </div>
-                <button type="button" className="dashboard-logout-btn">
+                <button type="button" className="dashboard-logout-btn" onClick={handleLogout}>
                   Logout
                 </button>
               </div>
@@ -180,27 +214,29 @@ export default function Dashboard() {
           </section>
 
           <section className="dashboard-subject-card">
-            <h2>Select a Subject</h2>
-            <p>Choose a subject from the list below to provide feedback.</p>
+            <h2>Choose Subject to Give Feedback</h2>
 
-            <div className="dashboard-select-wrapper">
-              <select
-                className="dashboard-select"
-                value={selectedSubject}
-                onChange={(e) => setSelectedSubject(e.target.value)}
-              >
-                <option value="">-- Select a Subject --</option>
-                {SUBJECTS.map((subject) => (
-                  <option key={subject} value={subject}>
-                    {subject}
-                  </option>
-                ))}
-              </select>
-              <span className="dashboard-select-arrow">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </span>
+            <div className="dashboard-subject-cards-container">
+              {SUBJECTS.map((subject) => (
+                <div
+                  key={subject}
+                  className="dashboard-subject-card-item"
+                  onClick={() => handleSubjectClick(subject)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleSubjectClick(subject)
+                    }
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                  </svg>
+                  <span className="subject-name">{subject}</span>
+                </div>
+              ))}
             </div>
 
             <div className="dashboard-info-box">

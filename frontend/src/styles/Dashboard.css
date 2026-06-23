@@ -318,6 +318,54 @@
   margin-top: 1px;
 }
 
+/* Subject cards */
+.dashboard-subject-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  margin-top: 20px;
+}
+
+.dashboard-subject-card-item {
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 24px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.dashboard-subject-card-item:hover {
+  border-color: #1a6fd4;
+  box-shadow: 0 8px 24px rgba(26, 111, 212, 0.15);
+  transform: translateY(-4px);
+  background: linear-gradient(135deg, #f0f7ff 0%, #e8f2fc 100%);
+}
+
+.dashboard-subject-card-item:active {
+  transform: translateY(-2px);
+}
+
+.dashboard-subject-card-item svg {
+  color: #1a6fd4;
+  width: 32px;
+  height: 32px;
+}
+
+.dashboard-subject-card-item .subject-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a2e;
+  line-height: 1.4;
+}
+
 .dashboard-overlay {
   display: none;
   position: fixed;
