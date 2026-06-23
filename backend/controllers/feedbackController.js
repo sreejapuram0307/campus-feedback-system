@@ -84,27 +84,18 @@ export const checkFeedbackStatus = async (req, res) => {
   try {
     const { studentEmail, subject } = req.query
 
-    if (!studentEmail || !subject) {
-      return res.status(400).json({
-        success: false,
-        message: 'studentEmail and subject required',
-      })
-    }
-
     const existing = await Feedback.findOne({
       studentEmail,
       subject,
     })
 
-    return res.status(200).json({
-      success: true,
+    return res.json({
       alreadySubmitted: !!existing,
     })
   } catch (error) {
     console.error(error)
     return res.status(500).json({
-      success: false,
-      message: 'Server error',
+      alreadySubmitted: false,
     })
   }
 }

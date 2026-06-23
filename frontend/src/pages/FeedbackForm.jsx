@@ -124,7 +124,7 @@ export default function FeedbackForm() {
         comments: formData.additionalComments,
       }
 
-      const response = await fetch('http://localhost:5000/api/feedback/submit', {
+      const response = await fetch('http://localhost:5000/feedback/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
