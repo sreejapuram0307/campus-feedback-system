@@ -2,6 +2,7 @@ import { OAuth2Client } from 'google-auth-library'
 import jwt from 'jsonwebtoken'
 import { env } from '../config/env.js'
 import Student from '../models/Student.js'
+import Admin from '../models/Admin.js'
 
 function createOAuth2Client() {
   return new OAuth2Client(
@@ -61,20 +62,38 @@ export const googleCallback = async (req, res) => {
       return res.redirect(`${env.FRONTEND_URL}/access-denied`)
     }
 
-    const student = await Student.findOne({ email })
+  // Check if the user is an Admin
+const admin = await Admin.findOne({ email })
 
-    if (!student) {
-      return res.redirect(`${env.FRONTEND_URL}/access-denied`)
-    }
+if (admin) {
+  const token = jwt.sign(
+    {
+      email: admin.email,
+      role: 'admin',
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: '1d' }
+  )
+
+  return res.redirect(`${env.FRONTEND_URL}/admin?token=${token}`)
+}
+
+// If not Admin, check Student
+const student = await Student.findOne({ email })
+
+if (!student) {
+  return res.redirect(`${env.FRONTEND_URL}/access-denied`)
+}
 
     const token = jwt.sign(
-      {
-        email: student.email,
-        rollNumber: student.rollNumber,
-        branch: student.branch,
-        year: student.year,
-        section: student.section,
-      },
+  {
+    email: student.email,
+    rollNumber: student.rollNumber,
+    branch: student.branch,
+    year: student.year,
+    section: student.section,
+    role: 'student',
+  },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     )
