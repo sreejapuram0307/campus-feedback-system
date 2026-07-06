@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [user, setUser] = useState(null)
   const [profileOpen, setProfileOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [submittedSubjects, setSubmittedSubjects] = useState([])
   const profileRef = useRef(null)
 
  const handleSubjectClick = async (subject) => {
@@ -87,6 +88,21 @@ export default function Dashboard() {
     }
 
     setUser(decoded)
+
+    const fetchSubmittedSubjects = async (email) => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/feedback/submitted-subjects?studentEmail=${encodeURIComponent(email)}`
+        )
+
+        const data = await response.json()
+        setSubmittedSubjects(data.submittedSubjects || [])
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchSubmittedSubjects(decoded.email)
   }, [navigate])
 
   useEffect(() => {
@@ -217,26 +233,36 @@ export default function Dashboard() {
             <h2>Choose Subject to Give Feedback</h2>
 
             <div className="dashboard-subject-cards-container">
-              {SUBJECTS.map((subject) => (
-                <div
-                  key={subject}
-                  className="dashboard-subject-card-item"
-                  onClick={() => handleSubjectClick(subject)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      handleSubjectClick(subject)
-                    }
-                  }}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                  </svg>
-                  <span className="subject-name">{subject}</span>
-                </div>
-              ))}
+              {SUBJECTS.map((subject) => {
+                const isSubmitted = submittedSubjects.includes(subject)
+
+                return (
+                  <div
+                    key={subject}
+                    className={`dashboard-subject-card-item${isSubmitted ? ' submitted' : ''}`}
+                    onClick={() => {
+                      if (!isSubmitted) {
+                        handleSubjectClick(subject)
+                      }
+                    }}
+                    role="button"
+                    tabIndex={isSubmitted ? -1 : 0}
+                    onKeyDown={(e) => {
+                      if (isSubmitted) return
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleSubjectClick(subject)
+                      }
+                    }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                    </svg>
+                    <span className="subject-name">{subject}</span>
+                    {isSubmitted && <span className="dashboard-submitted-badge">✓ Submitted</span>}
+                  </div>
+                )
+              })}
             </div>
 
             <div className="dashboard-info-box">

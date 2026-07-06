@@ -366,6 +366,42 @@
   line-height: 1.4;
 }
 
+.dashboard-subject-card-item.submitted {
+  background: #dcfce7;
+  border: 2px solid #22c55e;
+  color: #166534;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.dashboard-subject-card-item.submitted:hover {
+  border-color: #22c55e;
+  box-shadow: none;
+  transform: none;
+  background: #dcfce7;
+}
+
+.dashboard-subject-card-item.submitted svg {
+  color: #16a34a;
+}
+
+.dashboard-subject-card-item.submitted .subject-name {
+  color: #166534;
+}
+
+.dashboard-submitted-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #16a34a;
+  color: #fff;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .dashboard-overlay {
   display: none;
   position: fixed;
