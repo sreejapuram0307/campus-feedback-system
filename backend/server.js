@@ -4,6 +4,8 @@ import { env } from './config/env.js'
 import connectDB from './config/db.js'
 import authRoutes from './routes/auth.js'
 import feedbackRoutes from './routes/feedbackRoutes.js'
+import adminRoutes from './routes/adminRoutes.js'
+import studentStatusRoutes from './routes/studentStatusRoutes.js'
 import { getUser } from './controllers/authController.js'
 import { verifyToken } from './middleware/authMiddleware.js'
 
@@ -16,6 +18,8 @@ app.use(express.json())
 
 app.use('/auth', authRoutes)
 app.use('/feedback', feedbackRoutes)
+app.use('/admin', adminRoutes)
+app.use('/student', studentStatusRoutes)
 
 app.get('/api/user', verifyToken, getUser)
 

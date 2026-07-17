@@ -1,6 +1,6 @@
 import Feedback from '../models/Feedback.js'
 import Student from '../models/Student.js'
-import SectionFacultyMapping from '../models/SectionFacultyMapping.js'
+import FacultyAssignment from '../models/FacultyAssignment.js'
 
 export const submitFeedback = async (req, res) => {
   try {
@@ -136,17 +136,19 @@ export const getSubjectsForStudent = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Student not found' })
     }
 
-    const mapping = await SectionFacultyMapping.findOne({
+    const assignments = await FacultyAssignment.find({
       branch: student.branch,
       year: student.year,
       section: student.section,
     })
 
-    if (!mapping) {
-      return res.status(404).json({ success: false, message: 'Mapping not found for student section' })
+    if (!assignments.length) {
+      return res.status(404).json({ success: false, message: 'No assignments found for student section' })
     }
 
-    return res.json({ subjects: mapping.subjects })
+    const subjects = assignments.map((assignment) => `${assignment.subject.trim()} - ${assignment.faculty.trim()}`)
+
+    return res.json({ subjects })
   } catch (error) {
     console.error(error)
     return res.status(500).json({ success: false, message: 'Server error' })

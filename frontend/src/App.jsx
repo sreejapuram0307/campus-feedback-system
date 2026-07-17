@@ -5,6 +5,7 @@ import Admin from './pages/Admin'
 import AccessDenied from './pages/AccessDenied'
 import FeedbackForm from './pages/FeedbackForm'
 import SuccessPage from './pages/SuccessPage'
+import StatusTracking from './pages/StatusTracking'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/access-denied" element={<AccessDenied />} />
         <Route path="/feedback" element={<FeedbackForm />} />
         <Route path="/success" element={<SuccessPage />} />
+        <Route path="/status" element={<StatusTracking />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

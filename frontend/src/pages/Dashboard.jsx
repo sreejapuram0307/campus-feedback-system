@@ -2,12 +2,6 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../styles/Dashboard.css'
 
-const SUBJECTS = [
-  'SIMA - Rajashekhar',
-  'DLD - Shireesha',
-  'Software Engineering - Sowmya',
-]
-
 function decodeToken(token) {
   try {
     const payload = token.split('.')[1]
@@ -27,6 +21,7 @@ export default function Dashboard() {
   const [user, setUser] = useState(null)
   const [profileOpen, setProfileOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [subjects, setSubjects] = useState([])
   const [submittedSubjects, setSubmittedSubjects] = useState([])
   const profileRef = useRef(null)
 
@@ -102,7 +97,28 @@ export default function Dashboard() {
       }
     }
 
+    const fetchSubjects = async (rollNumber) => {
+      try {
+        const token = localStorage.getItem('token')
+        const response = await fetch(
+          `http://localhost:5000/feedback/subjects/${encodeURIComponent(rollNumber)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const data = await response.json()
+        setSubjects(data.subjects || [])
+      } catch (error) {
+        console.error('Failed to load subjects:', error)
+        setSubjects([])
+      }
+    }
+
     fetchSubmittedSubjects(decoded.email)
+    fetchSubjects(decoded.rollNumber)
   }, [navigate])
 
   useEffect(() => {
@@ -161,7 +177,8 @@ export default function Dashboard() {
             </svg>
             <span>Dashboard</span>
           </button>
-          <button type="button" className="dashboard-nav-item">
+          <button type="button" className="dashboard-nav-item"
+            onClick={() => navigate('/status')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
               <rect x="9" y="3" width="6" height="4" rx="1" />
@@ -233,7 +250,7 @@ export default function Dashboard() {
             <h2>Choose Subject to Give Feedback</h2>
 
             <div className="dashboard-subject-cards-container">
-              {SUBJECTS.map((subject) => {
+              {subjects.map((subject) => {
                 const isSubmitted = submittedSubjects.includes(subject)
 
                 return (
