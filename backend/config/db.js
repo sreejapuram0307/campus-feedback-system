@@ -4,11 +4,15 @@ import { env } from './env.js'
 const connectDB = async () => {
   try {
     await mongoose.connect(env.MONGO_URI)
-    console.log('MongoDB connected')
+
+    console.log('✅ MongoDB Connected')
+    console.log('Host:', mongoose.connection.host)
+    console.log('Database:', mongoose.connection.name)
   } catch (error) {
-    console.error('MongoDB connection error:', error.message)
-    process.exit(1)
-  }
+  console.error("===== FULL MONGODB ERROR =====");
+  console.error(error);
+  process.exit(1);
+}
 }
 
 export default connectDB
